@@ -32,7 +32,10 @@ if __name__ == "__main__":
     # add rows based on mbox file
     for message in mailbox.mbox(mbox_file):
         contents = get_message(message)
-        if message["from"] != from_filter:
+        clip_idx = contents.find('<jarrod@udacity.com>')
+        if clip_idx != -1:
+            contents = contents[:clip_idx]
+        if message["subject"].find('A Personal Request') != -1 and message["from"] != from_filter:
         	writer.writerow([message["subject"], message["from"], message["date"], contents])
 
     # print finish message
