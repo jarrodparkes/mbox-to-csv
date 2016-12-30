@@ -1,5 +1,6 @@
 import mailbox
 import csv
+import html2text
 
 # constants
 export_file_name = "clean_mail.csv"
@@ -16,12 +17,7 @@ def get_message(message):
 if __name__ == "__main__":
 
     # get command line arguments
-    mbox_file = raw_input("mbox file (ex. my_file.mbox): ")
-    name_of_sender = raw_input("name of sender to filter (ex. Jarrod Parkes): ")
-    email_of_sender = raw_input("email of sender to filter (ex. jarrod@udacity.com): ")
-
-    # create FROM filter
-    from_filter = name_of_sender + " <" + email_of_sender + ">"
+    mbox_file = raw_input("mbox file (ex. my_file.mbox, in same directory): ")
 
     # create CSV file
     writer = csv.writer(open(export_file_name, "wb"))
@@ -32,11 +28,8 @@ if __name__ == "__main__":
     # add rows based on mbox file
     for message in mailbox.mbox(mbox_file):
         contents = get_message(message)
-        clip_idx = contents.find('<jarrod@udacity.com>')
-        if clip_idx != -1:
-            contents = contents[:clip_idx]
-        if message["subject"].find('A Personal Request') != -1 and message["from"] != from_filter:
-        	writer.writerow([message["subject"], message["from"], message["date"], contents])
+        contents = html2text.html2text(contents)
+        writer.writerow([message["subject"], message["from"], message["date"], contents])
 
     # print finish message
     print "generated csv file called " + export_file_name
