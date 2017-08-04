@@ -16,8 +16,14 @@ def get_message(message):
 
 if __name__ == "__main__":
 
-    # get command line arguments
-    mbox_file = raw_input("mbox file (ex. my_file.mbox, in same directory): ")
+    # get mbox file
+    mbox_file = raw_input("name of mbox file in current directory (ex. my_file.mbox): ")
+
+    # get name to filter
+    name_filter = raw_input("name of sender that you want to filter (ex. Jarrod Parkes): ")
+
+    # get email to filter
+    email_filter = raw_input("email of sender that you want to filter (ex. parkesfjarrod@gmail.com): ")
 
     # create CSV file
     writer = csv.writer(open(export_file_name, "wb"))
@@ -29,7 +35,13 @@ if __name__ == "__main__":
     for message in mailbox.mbox(mbox_file):
         contents = get_message(message)
         contents = html2text.html2text(contents)
-        writer.writerow([message["subject"], message["from"], message["date"], contents])
+        # does message contain name or email filter?
+        if name_filter != "" and name_filter in message["from"]:
+            writer.writerow([message["subject"], message["from"], message["date"], contents])
+        elif email_filter != "" and email_filter in message["from"]:
+            writer.writerow([message["subject"], message["from"], message["date"], contents])            
+        else:
+            continue
 
     # print finish message
     print "generated csv file called " + export_file_name
