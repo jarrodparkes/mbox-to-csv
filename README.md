@@ -7,8 +7,10 @@ A Python script for extracting emails from an MBOX file into a CSV file. The scr
 ## How to Run the Script
 
 [1] Install Docker
-    - [Windows](https://www.docker.com/docker-windows)
-    - [Mac](https://www.docker.com/docker-mac)
+
+- [Windows](https://www.docker.com/docker-windows)
+- [Mac](https://www.docker.com/docker-mac)
+
 [2] Clone the Repository, Run the Script!
 
 ```bash
