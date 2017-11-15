@@ -7,12 +7,20 @@ export_file_name = "clean_mail.csv"
 
 # get body of email
 def get_message(message):
-    if not message.is_multipart():
+    if message.is_multipart():
+        body = ""
+        for part in message.get_payload():
+            if part.is_multipart():
+                for subpart in part.walk():
+                    if subpart.get_content_type() == "text/html":
+                        body += str(subpart)
+                    elif subpart.get_content_type() == "text/plain":
+                        body += str(subpart)
+            else:
+                body += str(part)
+        return body
+    else:
         return message.get_payload()
-    contents = ""
-    for msg in message.get_payload():
-        contents = contents + str(msg.get_payload()) + '\n'
-    return contents
 
 if __name__ == "__main__":
 
@@ -39,7 +47,7 @@ if __name__ == "__main__":
         if name_filter != "" and name_filter in message["from"]:
             writer.writerow([message["subject"], message["from"], message["date"], contents])
         elif email_filter != "" and email_filter in message["from"]:
-            writer.writerow([message["subject"], message["from"], message["date"], contents])            
+            writer.writerow([message["subject"], message["from"], message["date"], contents])
         else:
             continue
 
