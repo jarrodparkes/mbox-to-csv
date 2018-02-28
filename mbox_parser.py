@@ -48,6 +48,8 @@ if __name__ == "__main__":
             writer.writerow([message["subject"], message["from"], message["date"], contents])
         elif email_filter != "" and email_filter in message["from"]:
             writer.writerow([message["subject"], message["from"], message["date"], contents])
+        elif email_filter != "" and name_filter != "":
+            writer.writerow([message["subject"], message["from"], message["date"], contents])
         else:
             continue
 
