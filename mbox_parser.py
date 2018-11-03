@@ -28,10 +28,10 @@ if __name__ == "__main__":
     mbox_file = raw_input("name of mbox file in current directory (ex. my_file.mbox): ")
 
     # get name to filter
-    name_filter = raw_input("name of sender that you want to filter (ex. Jarrod Parkes): ")
+    name_filter = raw_input("name of sender that you want to filter (ex. Jarrod Parkes, * for any): ")
 
     # get email to filter
-    email_filter = raw_input("email of sender that you want to filter (ex. parkesfjarrod@gmail.com): ")
+    email_filter = raw_input("email of sender that you want to filter (ex. parkesfjarrod@gmail.com, * for any): ")
 
     # create CSV file
     writer = csv.writer(open(export_file_name, "wb"))
