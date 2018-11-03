@@ -28,8 +28,8 @@ I've provided an `example.mbox` file to demonstrate how the script is used. For 
 ```bash
 ~/mbox-to-csv $ ./run.sh
 name of mbox file in current directory (ex. my_file.mbox): example.mbox
-name of sender that you want to filter (ex. Jarrod Parkes):
-email of sender that you want to filter (ex. parkesfjarrod@gmail.com): parkesrjames@gmail.com
+name of sender that you want to filter (ex. Jarrod Parkes, * for any):
+email of sender that you want to filter (ex. parkesfjarrod@gmail.com, * for any): parkesrjames@gmail.com
 generated csv file called clean_mail.csv
 # clean_mail.csv only contains emails parkesfjames@gmail.com sent
 ```
