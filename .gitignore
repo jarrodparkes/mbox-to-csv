@@ -1,3 +1,4 @@
 .DS_Store
 *.pyc
 clean_mail.csv
+.python-version
