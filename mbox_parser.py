@@ -25,19 +25,23 @@ def get_contents(email):
 if __name__ == "__main__":
 
     # get mbox file
-    mbox_file = raw_input("path to MBOX file: ")
-
+    #mbox_file = raw_input("path to MBOX file: ")
+    mbox_file = 'ier1.mbox'
+    
     # create CSV file    
     writer = csv.writer(open(export_file_name, "wb"), encoding='utf-8')
 
     # create header row
-    writer.writerow(["subject", "from", "date", "body"])
+    keys = ['Date', 'X-Gmail-Labels', 'X-GM-THRID', 'To', 'Subject', 'From']
+    header = keys + ["Body"]
+    writer.writerow(header)
+    
 
     # add rows based on mbox file
     for email in mailbox.mbox(mbox_file):
         contents = get_contents(email)
         contents = html2text.html2text(contents)
-        writer.writerow([email["subject"], email["from"], email["date"], contents])
-
+        #writer.writerow([email["subject"], email["from"], email["date"], contents])
+        writer.writerow([email[key] for key in keys] + [contents])
     # print finish message
     print "generated CSV file called " + export_file_name
