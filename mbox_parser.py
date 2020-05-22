@@ -1,5 +1,5 @@
 import mailbox
-import csv
+import unicodecsv as csv
 import html2text
 
 # constants
@@ -27,8 +27,8 @@ if __name__ == "__main__":
     # get mbox file
     mbox_file = raw_input("path to MBOX file: ")
 
-    # create CSV file
-    writer = csv.writer(open(export_file_name, "wb"))
+    # create CSV file    
+    writer = csv.writer(open(export_file_name, "wb"), encoding='utf-8')
 
     # create header row
     writer.writerow(["subject", "from", "date", "body"])
