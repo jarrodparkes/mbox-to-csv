@@ -25,8 +25,8 @@ def get_contents(email):
 if __name__ == "__main__":
 
     # get mbox file
-    #mbox_file = raw_input("path to MBOX file: ")
-    mbox_file = 'ier1.mbox'
+    mbox_file = raw_input("path to MBOX file: ")
+    export_file_name = mbox_file + "_clean.csv"
     
     # create CSV file    
     writer = csv.writer(open(export_file_name, "wb"), encoding='utf-8')
