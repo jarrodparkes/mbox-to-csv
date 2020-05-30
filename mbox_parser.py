@@ -1,5 +1,5 @@
 import mailbox
-import csv
+import unicodecsv as csv
 import html2text
 
 # constants
@@ -25,10 +25,10 @@ def get_contents(email):
 if __name__ == "__main__":
 
     # get mbox file
-    mbox_file = raw_input("path to MBOX file: ")
+    mbox_file = input("path to MBOX file: ")
 
     # create CSV file
-    writer = csv.writer(open(export_file_name, "wb"))
+    writer = csv.writer(open(export_file_name, "wb"), encoding='utf-8')
 
     # create header row
     writer.writerow(["subject", "from", "date", "body"])
@@ -40,4 +40,4 @@ if __name__ == "__main__":
         writer.writerow([email["subject"], email["from"], email["date"], contents])
 
     # print finish message
-    print "generated CSV file called " + export_file_name
+    print("generated CSV file called " + export_file_name)

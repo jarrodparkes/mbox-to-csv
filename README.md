@@ -1,6 +1,6 @@
 # MBOX to CSV
 
-![Python 2.7](https://img.shields.io/badge/python-2.7-yellow.svg)
+![Python 3.7](https://img.shields.io/badge/python-3.7-yellow.svg)
 
 Extract emails from an MBOX file into a CSV file.
 
