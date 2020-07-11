@@ -8,14 +8,11 @@ Extract emails from an MBOX file into a CSV file.
 
 ```bash
 
-# launch virtual environment
+# launch virtual environment with included dependencies
 source env/bin/activate
 
-# launch tool
-python3 mbox_parser.py
-path to MBOX file: example.mbox
-
-# generated CSV file called clean_mail.csv...
+# run tool using example file
+python3 mbox_parser.py example.mbox
 
 # deactivate virtual environment
 deactivate
