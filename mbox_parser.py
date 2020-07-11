@@ -33,7 +33,7 @@ def get_emails_clean(field_contents):
         emails_cleaned = []
         for match in matches:
             emails_cleaned.append(match)
-        return ", ".join(emails_cleaned)
+        return ", ".join(sorted(emails_cleaned, key=str.lower))
     else:
         return "n/a"
 
