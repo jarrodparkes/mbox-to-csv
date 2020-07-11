@@ -7,7 +7,20 @@ Extract emails from an MBOX file into a CSV file.
 ## Example
 
 ```bash
-python mbox_parser.py
+
+# launch virtual environment
+source env/bin/activate
+
+# launch tool
+python3 mbox_parser.py
 path to MBOX file: example.mbox
-# generated CSV file called clean_mail.csv
+
+# generated CSV file called clean_mail.csv...
+
+# deactivate virtual environment
+deactivate
 ```
+
+## References
+
+- [Python Virtual Environments](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
