@@ -1,43 +1,80 @@
+from bs4 import BeautifulSoup
+from email_reply_parser import EmailReplyParser
 import mailbox
+import quopri
+import re
+import sys
 import unicodecsv as csv
-import html2text
 
-# constants
-export_file_name = "clean_mail.csv"
+# clean content
+def clean_content(content):
+    # decode message from "quoted printable" format
+    content = quopri.decodestring(content)
 
-# get body of email
-def get_contents(email):
-    if email.is_multipart():
-        body = ""
-        for part in email.get_payload():
-            if part.is_multipart():
-                for subpart in part.walk():
-                    if subpart.get_content_type() == "text/html":
-                        body += str(subpart)
-                    elif subpart.get_content_type() == "text/plain":
-                        body += str(subpart)
-            else:
-                body += str(part)
-        return body
+    # try to strip HTML tags
+    # if errors happen in BeautifulSoup (for unknown encodings), then bail
+    try:
+        soup = BeautifulSoup(content, features="html.parser")
+    except:
+        return ''
+    return ''.join(soup.findAll(text=True))
+
+# get contents of email
+def get_content(email):
+    parts = []
+
+    for part in email.walk():
+        if part.get_content_maintype() == 'multipart':
+            continue
+
+        content = part.get_payload(decode=True)
+
+        part_contents = ""
+        if content is None:
+            part_contents = 'n/a'
+        else:
+            part_contents = EmailReplyParser.parse_reply(clean_content(content))
+
+        parts.append(part_contents)
+
+    return parts[0]
+
+# get all emails in field
+def get_emails_clean(field):
+    # find all matches with format <user@example.com> or user@example.com
+    matches = re.findall(r'\<?([a-zA-Z0-9_\-\.]+@[a-zA-Z0-9_\-\.]+\.[a-zA-Z]{2,5})\>?', str(field))
+    if matches:
+        emails_cleaned = []
+        for match in matches:
+            emails_cleaned.append(match)
+        return ", ".join(sorted(emails_cleaned, key=str.lower))
     else:
-        return email.get_payload()
+        return "n/a"
 
-if __name__ == "__main__":
+# entry point
+if __name__ == '__main__':
+    argv = sys.argv
 
-    # get mbox file
-    mbox_file = input("path to MBOX file: ")
+    if len(argv) != 2:
+        print('usage: mbox_parser.py [path_to_mbox]')
+    else:
+        mbox_file = argv[1]
+        export_file_name = mbox_file + ".csv"
+        export_file = open(export_file_name, "wb")
 
-    # create CSV file
-    writer = csv.writer(open(export_file_name, "wb"), encoding='utf-8')
+        writer = csv.writer(export_file, encoding='utf-8')
+        writer.writerow(["date", "from", "to", "cc", "subject", "content"])
 
-    # create header row
-    writer.writerow(["subject", "from", "date", "body"])
+        row_written = 0
+        for email in mailbox.mbox(mbox_file):
+            writer.writerow([email["date"],
+                            get_emails_clean(email["from"]),
+                            get_emails_clean(email["to"]),
+                            get_emails_clean(email["cc"]),
+                            re.sub('[\n\t\r]', ' -- ', email["subject"]),
+                            get_content(email)])
 
-    # add rows based on mbox file
-    for email in mailbox.mbox(mbox_file):
-        contents = get_contents(email)
-        contents = html2text.html2text(contents)
-        writer.writerow([email["subject"], email["from"], email["date"], contents])
+            row_written += 1
 
-    # print finish message
-    print("generated CSV file called " + export_file_name)
+        print("generated CSV file called " + export_file_name + " with " + str(row_written) + " rows")
+        export_file.close()
