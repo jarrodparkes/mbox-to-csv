@@ -1,39 +1,18 @@
 from bs4 import BeautifulSoup
 from email_reply_parser import EmailReplyParser
 import mailbox
-import re
-import unicodecsv as csv
 import quopri
+import re
+import sys
+import unicodecsv as csv
 
-# constants
-export_file_name = "clean_mail.csv"
-
-# get body of email
-# def get_contents(email):
-#     if email.is_multipart():
-#         body = ""
-#         parts = email.get_payload(decode=True)
-#         if parts is not None:
-#             for part in parts:
-#                 if part.is_multipart():
-#                     for subpart in part.walk():
-#                         if subpart.get_content_type() == "text/html":
-#                             body += str(subpart)
-#                         elif subpart.get_content_type() == "text/plain":
-#                             body += str(subpart)
-#                 else:
-#                     body += str(part)
-#         return body
-#     else:
-#         return email.get_payload()
-
+# clean content
 def clean_content(content):
-
-    # Decode message from "quoted printable" format
+    # decode message from "quoted printable" format
     content = quopri.decodestring(content)
 
-    # Strip out HTML tags, if any are present.
-    # Bail on unknown encodings if errors happen in BeautifulSoup.
+    # try to strip HTML tags
+    # if errors happen in BeautifulSoup (for unknown encodings), then bail
     try:
         soup = BeautifulSoup(content, features="html.parser")
     except:
@@ -60,9 +39,10 @@ def get_content(email):
 
     return parts[0]
 
-def get_emails_clean(field_contents):
-    # regex finds all matches for <user@example.com> and user@example.com
-    matches = re.findall(r'\<?([a-zA-Z0-9_\-\.]+@[a-zA-Z0-9_\-\.]+\.[a-zA-Z]{2,5})\>?', str(field_contents))
+# get all emails in field
+def get_emails_clean(field):
+    # find all matches with format <user@example.com> or user@example.com
+    matches = re.findall(r'\<?([a-zA-Z0-9_\-\.]+@[a-zA-Z0-9_\-\.]+\.[a-zA-Z]{2,5})\>?', str(field))
     if matches:
         emails_cleaned = []
         for match in matches:
@@ -71,29 +51,30 @@ def get_emails_clean(field_contents):
     else:
         return "n/a"
 
-if __name__ == "__main__":
+# entry point
+if __name__ == '__main__':
+    argv = sys.argv
 
-    # get mbox file
-    mbox_file = input("path to MBOX file: ")
+    if len(argv) != 2:
+        print('usage: mbox_parser.py [path_to_mbox]')
+    else:
+        mbox_file = argv[1]
+        export_file_name = mbox_file + ".csv"
+        export_file = open(export_file_name, "wb")
 
-    # create CSV file
-    writer = csv.writer(open(export_file_name, "wb"), encoding='utf-8')
+        writer = csv.writer(export_file, encoding='utf-8')
+        writer.writerow(["date", "from", "to", "cc", "subject", "content"])
 
-    # create header row
-    writer.writerow(["date", "from", "to", "cc", "subject", "content"])
+        row_written = 0
+        for email in mailbox.mbox(mbox_file):
+            writer.writerow([email["date"],
+                            get_emails_clean(email["from"]),
+                            get_emails_clean(email["to"]),
+                            get_emails_clean(email["cc"]),
+                            re.sub('[\n\t\r]', ' -- ', email["subject"]),
+                            get_content(email)])
 
-    # add rows based on mbox file
-    row_written = 0
+            row_written += 1
 
-    for email in mailbox.mbox(mbox_file):
-        writer.writerow([email["date"],
-                        get_emails_clean(email["from"]),
-                        get_emails_clean(email["to"]),
-                        get_emails_clean(email["cc"]),
-                        re.sub('[\n\t\r]', ' -- ', email["subject"]),
-                        get_content(email)])
-
-        row_written += 1
-
-    # print finish message
-    print("generated CSV file called " + export_file_name + " with " + str(row_written) + " rows")
+        print("generated CSV file called " + export_file_name + " with " + str(row_written) + " rows")
+        export_file.close()
