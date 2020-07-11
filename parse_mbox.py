@@ -1,5 +1,6 @@
 from html.parser import HTMLParser
 from email.header import Header, decode_header
+from email_reply_parser import EmailReplyParser
 from bs4 import BeautifulSoup
 import mailbox
 import base64
@@ -123,7 +124,7 @@ class CustomMessage():
                 # drop blank lines
                 text = '\n'.join(chunk for chunk in chunks if chunk)
 
-                self.body = text
+                self.body = EmailReplyParser.parse_reply(text)
                 # # If it is an HTML message, remove HTML tags
                 # h = html2text.HTML2Text()
                 #
@@ -256,8 +257,8 @@ if __name__ == '__main__':
     else:
         file = argv[1]
         messages = extract_mbox_file(file)
-        # to_file(create_classification_line(messages, 'label'), file + '_features.csv')
-        to_file(text_messages_to_string(messages), file + '_full_extract.txt')
+        to_file(create_classification_line(messages, 'label'), file + '_features.csv')
+        # to_file(text_messages_to_string(messages), file + '_full_extract.txt')
 
 
 # Call to create a CSV file with the extracted data (body + label)
