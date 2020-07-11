@@ -1,4 +1,5 @@
 import mailbox
+import re
 import unicodecsv as csv
 
 # review https://www.oreilly.com/library/view/mining-the-social/9781449368180/ch06.html
@@ -25,6 +26,17 @@ def get_contents(email):
     else:
         return email.get_payload()
 
+def get_emails_clean(field_contents):
+    # regex finds all matches for <user@example.com> and user@example.com
+    matches = re.findall(r'\<?([a-zA-Z0-9_\-\.]+@[a-zA-Z0-9_\-\.]+\.[a-zA-Z]{2,5})\>?', str(field_contents))
+    if matches:
+        emails_cleaned = []
+        for match in matches:
+            emails_cleaned.append(match)
+        return ", ".join(emails_cleaned)
+    else:
+        return "n/a"
+
 if __name__ == "__main__":
 
     # get mbox file
@@ -38,8 +50,15 @@ if __name__ == "__main__":
 
     # add rows based on mbox file
     for email in mailbox.mbox(mbox_file):
+
         contents = get_contents(email)
-        writer.writerow([email["date"], email["from"], email["to"], email["cc"], email["subject"], contents])
+
+        writer.writerow([email["date"],
+                        get_emails_clean(email["from"]),
+                        get_emails_clean(email["to"]),
+                        get_emails_clean(email["cc"]),
+                        email["subject"],
+                        contents])
 
     # print finish message
     print("generated CSV file called " + export_file_name)
