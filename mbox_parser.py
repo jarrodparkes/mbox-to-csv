@@ -25,8 +25,8 @@ def clean_content(content):
     # try to strip HTML tags
     # if errors happen in BeautifulSoup (for unknown encodings), then bail
     try:
-        soup = BeautifulSoup(content, features="html.parser")
-    except:
+        soup = BeautifulSoup(content, "html.parser", from_encoding="iso-8859-1")
+    except Exception as e:
         return ''
     return ''.join(soup.findAll(text=True))
 
@@ -42,7 +42,7 @@ def get_content(email):
 
         part_contents = ""
         if content is None:
-            part_contents = 'n/a'
+            part_contents = ""
         else:
             part_contents = EmailReplyParser.parse_reply(clean_content(content))
 
@@ -60,7 +60,7 @@ def get_emails_clean(field):
             emails_cleaned.append(match)
         return ", ".join(sorted(emails_cleaned, key=str.lower))
     else:
-        return "n/a"
+        return ""
 
 # entry point
 if __name__ == '__main__':
@@ -77,14 +77,22 @@ if __name__ == '__main__':
         writer.writerow(["date", "from", "to", "cc", "subject", "content"])
 
         row_written = 0
+        cant_convert_count = 0
         for email in mailbox.mbox(mbox_file):
+
+            contents = get_content(email)
+
+            if not contents:
+                cant_convert_count += 1
+                contents = "[could not convert]"
+
             writer.writerow([get_date(email["date"], "%m/%d/%Y"),
                             get_emails_clean(email["from"]),
                             get_emails_clean(email["to"]),
                             get_emails_clean(email["cc"]),
                             re.sub('[\n\t\r]', ' -- ', email["subject"]),
-                            get_content(email)])
+                            contents])
             row_written += 1
 
-        print("generated CSV file called " + export_file_name + " with " + str(row_written) + " rows")
+        print("generated " + export_file_name + " for " + str(row_written) + " messages, " + str(cant_convert_count) + " messages had issues converting their content")
         export_file.close()
