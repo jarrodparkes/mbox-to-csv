@@ -4,19 +4,13 @@
 import optparse
 import os
 import sys
-from itertools import chain
 
 from pip._internal.cli.main_parser import create_main_parser
-from pip._internal.commands import commands_dict, create_command
+from pip._internal.commands import commands_dict, get_summaries
 from pip._internal.utils.misc import get_installed_distributions
-from pip._internal.utils.typing import MYPY_CHECK_RUNNING
-
-if MYPY_CHECK_RUNNING:
-    from typing import Any, Iterable, List, Optional
 
 
 def autocomplete():
-    # type: () -> None
     """Entry Point for completion of main and subcommand options.
     """
     # Don't complete if user hasn't sourced bash_completion file.
@@ -29,18 +23,17 @@ def autocomplete():
     except IndexError:
         current = ''
 
-    parser = create_main_parser()
-    subcommands = list(commands_dict)
+    subcommands = [cmd for cmd, summary in get_summaries()]
     options = []
-
     # subcommand
-    subcommand_name = None  # type: Optional[str]
-    for word in cwords:
-        if word in subcommands:
-            subcommand_name = word
-            break
+    try:
+        subcommand_name = [w for w in cwords if w in subcommands][0]
+    except IndexError:
+        subcommand_name = None
+
+    parser = create_main_parser()
     # subcommand options
-    if subcommand_name is not None:
+    if subcommand_name:
         # special case: 'help' subcommand has no options
         if subcommand_name == 'help':
             sys.exit(1)
@@ -61,7 +54,7 @@ def autocomplete():
                     print(dist)
                 sys.exit(1)
 
-        subcommand = create_command(subcommand_name)
+        subcommand = commands_dict[subcommand_name]()
 
         for opt in subcommand.parser.option_list_all:
             if opt.help != optparse.SUPPRESS_HELP:
@@ -80,8 +73,8 @@ def autocomplete():
         # get completion files and directories if ``completion_type`` is
         # ``<file>``, ``<dir>`` or ``<path>``
         if completion_type:
-            paths = auto_complete_paths(current, completion_type)
-            options = [(path, 0) for path in paths]
+            options = auto_complete_paths(current, completion_type)
+            options = ((opt, 0) for opt in options)
         for option in options:
             opt_label = option[0]
             # append '=' to options which require args
@@ -93,25 +86,22 @@ def autocomplete():
 
         opts = [i.option_list for i in parser.option_groups]
         opts.append(parser.option_list)
-        flattened_opts = chain.from_iterable(opts)
+        opts = (o for it in opts for o in it)
         if current.startswith('-'):
-            for opt in flattened_opts:
+            for opt in opts:
                 if opt.help != optparse.SUPPRESS_HELP:
                     subcommands += opt._long_opts + opt._short_opts
         else:
             # get completion type given cwords and all available options
-            completion_type = get_path_completion_type(cwords, cword,
-                                                       flattened_opts)
+            completion_type = get_path_completion_type(cwords, cword, opts)
             if completion_type:
-                subcommands = list(auto_complete_paths(current,
-                                                       completion_type))
+                subcommands = auto_complete_paths(current, completion_type)
 
         print(' '.join([x for x in subcommands if x.startswith(current)]))
     sys.exit(1)
 
 
 def get_path_completion_type(cwords, cword, opts):
-    # type: (List[str], int, Iterable[Any]) -> Optional[str]
     """Get the type of path completion (``file``, ``dir``, ``path`` or None)
 
     :param cwords: same as the environmental variable ``COMP_WORDS``
@@ -120,7 +110,7 @@ def get_path_completion_type(cwords, cword, opts):
     :return: path completion type (``file``, ``dir``, ``path`` or None)
     """
     if cword < 2 or not cwords[cword - 2].startswith('-'):
-        return None
+        return
     for opt in opts:
         if opt.help == optparse.SUPPRESS_HELP:
             continue
@@ -130,11 +120,9 @@ def get_path_completion_type(cwords, cword, opts):
                         x in ('path', 'file', 'dir')
                         for x in opt.metavar.split('/')):
                     return opt.metavar
-    return None
 
 
 def auto_complete_paths(current, completion_type):
-    # type: (str, str) -> Iterable[str]
     """If ``completion_type`` is ``file`` or ``path``, list all regular files
     and directories starting with ``current``; otherwise only list directories
     starting with ``current``.

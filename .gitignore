@@ -1,3 +1,5 @@
 .DS_Store
 *.pyc
 example.mbox.csv
+.blacklist
+.owner

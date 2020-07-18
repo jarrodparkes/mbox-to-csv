@@ -13,7 +13,7 @@ def CacheControl(
     cacheable_methods=None,
 ):
 
-    cache = DictCache() if cache is None else cache
+    cache = cache or DictCache()
     adapter_class = adapter_class or CacheControlAdapter
     adapter = adapter_class(
         cache,

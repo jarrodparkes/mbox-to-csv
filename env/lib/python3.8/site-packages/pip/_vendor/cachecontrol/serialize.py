@@ -107,8 +107,6 @@ class Serializer(object):
         """
         # Special case the '*' Vary value as it means we cannot actually
         # determine if the cached response is suitable for this request.
-        # This case is also handled in the controller code when creating
-        # a cache entry, but is left here for backwards compatibility.
         if "*" in cached.get("vary", {}):
             return
 
@@ -181,7 +179,7 @@ class Serializer(object):
 
     def _loads_v4(self, request, data):
         try:
-            cached = msgpack.loads(data, raw=False)
+            cached = msgpack.loads(data, encoding="utf-8")
         except ValueError:
             return
 

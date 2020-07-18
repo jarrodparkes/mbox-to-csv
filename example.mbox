@@ -38,7 +38,7 @@ Delivered-To: tester1@example.com
 Message-ID: <CAGiad1WxcT1Myc4BqRD0oh2OFZnofyRpepBmLqtSE=7GY55euQ@mail.gmail.com>
 Subject: The Final Email
 From: Tester One <tester1@example.com>
-To: Tester One <tester1@example.com>
+To: Tester Two <tester2@example.com>
 Content-Type: multipart/alternative; boundary="f403045f29c87e25c30555eeaa89"
 
 --f403045f29c87e25c30555eeaa89
@@ -68,7 +68,7 @@ Delivered-To: tester1@example.com
 Message-ID: <CAGiad1Wr9kJaSTb5mD_t2ymq68O7ErthBBsn+5CQW4mSwRP_+w@mail.gmail.com>
 Subject: Test Email
 From: Tester One <tester1@example.com>
-To: Tester One <tester1@example.com>
+To: Tester Two <tester2@example.com>
 Content-Type: multipart/alternative; boundary="f403045e2bc2b36fb30555eea7cd"
 
 --f403045e2bc2b36fb30555eea7cd
@@ -98,7 +98,7 @@ Delivered-To: tester1@example.com
 Message-ID: <CAGiad1U4jBELNMVwXCCf4_2xpZO_XqxeqCv6FeR5AAQM7rNeDA@mail.gmail.com>
 Subject: Another Test Email
 From: Tester One <tester1@example.com>
-To: Tester One <tester1@example.com>
+To: Tester Two <tester2@example.com>
 Content-Type: multipart/alternative; boundary="f4030436abb2861a710555eea829"
 
 --f4030436abb2861a710555eea829
