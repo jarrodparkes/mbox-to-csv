@@ -1,10 +1,21 @@
 from bs4 import BeautifulSoup
 from email_reply_parser import EmailReplyParser
+from email.utils import parsedate_tz, mktime_tz
+
+import datetime
 import mailbox
 import quopri
 import re
 import sys
+import time
 import unicodecsv as csv
+
+# converts seconds since epoch to mm/dd/yyyy string
+def get_date(second_since_epoch, date_format):
+    time_tuple = parsedate_tz(email["date"])
+    utc_seconds_since_epoch = mktime_tz(time_tuple)
+    datetime_obj = datetime.datetime.fromtimestamp(utc_seconds_since_epoch)
+    return datetime_obj.strftime(date_format)
 
 # clean content
 def clean_content(content):
@@ -67,13 +78,12 @@ if __name__ == '__main__':
 
         row_written = 0
         for email in mailbox.mbox(mbox_file):
-            writer.writerow([email["date"],
+            writer.writerow([get_date(email["date"], "%m/%d/%Y"),
                             get_emails_clean(email["from"]),
                             get_emails_clean(email["to"]),
                             get_emails_clean(email["cc"]),
                             re.sub('[\n\t\r]', ' -- ', email["subject"]),
                             get_content(email)])
-
             row_written += 1
 
         print("generated CSV file called " + export_file_name + " with " + str(row_written) + " rows")
