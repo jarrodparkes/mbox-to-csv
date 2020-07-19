@@ -2,4 +2,4 @@
 *.pyc
 example.mbox.csv
 .blacklist
-.owner
+.owners

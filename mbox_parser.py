@@ -2,8 +2,10 @@ from bs4 import BeautifulSoup
 from email_reply_parser import EmailReplyParser
 from email.utils import parsedate_tz, mktime_tz
 
+import ast
 import datetime
 import mailbox
+import ntpath
 import quopri
 import re
 import sys
@@ -95,16 +97,22 @@ if __name__ == '__main__':
         print('usage: mbox_parser.py [path_to_mbox]')
     else:
         mbox_file = argv[1]
+        file_name = ntpath.basename(mbox_file)
         export_file_name = mbox_file + ".csv"
         export_file = open(export_file_name, "wb")
 
         # get email of owner
         owner = ""
         owners = []
-        if path.exists(".owner"):
-            with open('.owner', 'r') as ownerlist:
-                owners = [owner.rstrip() for owner in ownerlist.readlines()]
-            owner = owners[0]
+        if path.exists(".owners"):
+            with open('.owners', 'r') as ownerlist:
+                contents = ownerlist.read()
+                owner_dict = ast.literal_eval(contents)
+
+            for owner_key in owner_dict:
+                if owner_key in file_name:
+                    owner = owner_dict[owner_key]
+                    break
 
         # get domain blacklist
         blacklist_domains = []
