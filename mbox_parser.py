@@ -8,6 +8,7 @@ import mailbox
 import ntpath
 import quopri
 import re
+import rules
 import sys
 import time
 import unicodecsv as csv
@@ -62,32 +63,11 @@ def get_emails_clean(field):
     if matches:
         emails_cleaned = []
         for match in matches:
-            emails_cleaned.append(match)
-        return sorted(emails_cleaned, key=str.lower)
+            emails_cleaned.append(match.lower())
+        unique_emails = list(set(emails_cleaned))
+        return sorted(unique_emails, key=str.lower)
     else:
         return []
-
-# is there a blacklisted domain in this list of emails?
-def blacklisted_email_domain(emails):
-    for email in emails:
-        domain = email.split('@')[1]
-        if domain in blacklist_domains:
-            return domain
-    return None
-
-def blacklist_row(date, subject, blacklist_domain):
-    blacklist_content = "[" + blacklist_domain + " blacklisted]"
-    return [
-        "x",
-        date,
-        "",
-        blacklist_content,
-        blacklist_content,
-        blacklist_content,
-        subject,
-        blacklist_content,
-        "0"
-    ]
 
 # entry point
 if __name__ == '__main__':
@@ -101,7 +81,7 @@ if __name__ == '__main__':
         export_file_name = mbox_file + ".csv"
         export_file = open(export_file_name, "wb")
 
-        # get email of owner
+        # get owner of the mbox
         owner = ""
         owners = []
         if path.exists(".owners"):
@@ -124,13 +104,10 @@ if __name__ == '__main__':
         writer = csv.writer(export_file, encoding='utf-8')
         writer.writerow(["flagged", "date", "description", "from", "to", "cc", "subject", "content", "time (minutes)"])
 
-        # create row counts
+        # create row count
         row_written = 0
-        cant_convert_count = 0
-        blacklist_count = 0
 
         for email in mailbox.mbox(mbox_file):
-
             # capture default content
             date = get_date(email["date"], "%m/%d/%Y")
             sent_from = get_emails_clean(email["from"])
@@ -138,71 +115,18 @@ if __name__ == '__main__':
             cc = get_emails_clean(email["cc"])
             subject = re.sub('[\n\t\r]', ' -- ', email["subject"])
             contents = get_content(email)
-            content_length = len(contents)
 
-            # get description/code
-            description = ""
-            if owner in sent_from:
-                description = "DR Correspondence"
-            elif owner in sent_to:
-                description = "RV Correspondence"
+            # apply rules to default content
+            row = rules.apply_rules(date, sent_from, sent_to, cc, subject, contents, owner, blacklist_domains)
 
-            # get time calculation
-
-            if content_length < 40:
-                time = "0"
-            elif content_length >= 40 and content_length < 120:
-                time = "1"
-            elif content_length >= 120 and content_length < 400:
-                time = "6"
-            else:
-                time = "12"
-
-            # check blacklist
-            sent_blacklisted = blacklisted_email_domain(sent_from)
-            to_blacklisted = blacklisted_email_domain(sent_to)
-            cc_blacklisted = blacklisted_email_domain(cc)
-
-            row = []
-            if sent_blacklisted is not None:
-                blacklist_count += 1
-                row = blacklist_row(date, subject, sent_blacklisted)
-            elif to_blacklisted is not None:
-                blacklist_count += 1
-                row = blacklist_row(date, subject, to_blacklisted)
-            elif cc_blacklisted is not None:
-                blacklist_count += 1
-                row = blacklist_row(date, subject, cc_blacklisted)
-            elif not contents:
-                cant_convert_count += 1
-                row = [
-                    "x",
-                    date,
-                    description,
-                    ", ".join(sent_from),
-                    ", ".join(sent_to),
-                    ", ".join(cc),
-                    subject,
-                    "[could not convert]",
-                    "0"
-                ]
-            else:
-                flagged = "x" if time == "12" else ""
-                row = [
-                    flagged,
-                    date,
-                    description,
-                    ", ".join(sent_from),
-                    ", ".join(sent_to),
-                    ", ".join(cc),
-                    subject,
-                    contents,
-                    time
-                ]
-
+            # write the row
             writer.writerow(row)
-
             row_written += 1
 
-        print("generated " + export_file_name + " for " + str(row_written) + " messages (" + str(cant_convert_count) + " could not convert; " + str(blacklist_count) + " blacklisted)")
+        # report
+        report = "generated " + export_file_name + " for " + str(row_written) + " messages"
+        report += " (" + str(rules.cant_convert_count) + " could not convert; "
+        report += str(rules.blacklist_count) + " blacklisted)"
+        print(report)
+
         export_file.close()

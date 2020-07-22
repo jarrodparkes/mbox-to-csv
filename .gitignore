@@ -4,3 +4,4 @@ example.mbox.csv
 .blacklist
 .owners
 *.icns
+rules.py
