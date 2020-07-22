@@ -23,6 +23,7 @@ deactivate
 ## References
 
 - [Python Virtual Environments](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
+- [Email Address and MIME Parsing](https://github.com/mailgun/flanker)
 - [Signature Stripping Solution](https://github.com/mailgun/talon)
 - [MBOX Parsing Example: Mining the Social](https://www.oreilly.com/library/view/mining-the-social/9781449368180/ch06.html)
 - [Gmail MBOX Parser](https://github.com/alejandro-g-m/Gmail-MBOX-email-parser)
