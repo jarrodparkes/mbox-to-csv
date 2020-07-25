@@ -20,6 +20,11 @@ python3 mbox_parser.py example.mbox
 deactivate
 ```
 
+## Bundling a Platypus Build
+
+You will need to copy the actual Python binary from `/usr/local/...` into the `$PWD/env` directory. Otherwise, if someone is trying to run this as a Platypus app
+on their Mac they will be missing the specific Python distro used on your machine.
+
 ## References
 
 - [Python Virtual Environments](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
