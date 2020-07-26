@@ -1,3 +1,3 @@
 #!/bin/sh
 
-"$PWD/env/bin/python" mbox_parser.py "$@"
+"$PWD/python3.8/python3.8" mbox_parser.py "$@"

@@ -5,3 +5,4 @@ example.mbox.csv
 .owners
 *.icns
 rules.py
+python3.8

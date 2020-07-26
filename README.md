@@ -20,10 +20,13 @@ python3 mbox_parser.py example.mbox
 deactivate
 ```
 
-## Bundling a Platypus Build
+## Embedding Python Interpreter and Dependencies into Platypus-Built App
 
-You will need to copy the actual Python binary from `/usr/local/...` into the `$PWD/env` directory. Otherwise, if someone is trying to run this as a Platypus app
-on their Mac they will be missing the specific Python distro used on your machine.
+With some manual effort, it is possible to package this script as a drag-and-drop Platypus-built Mac app. In order to do this, we are required to bundle a python installation (interpreter and dependencies) within the app's resources. This is possible by following the guide below.
+
+- [Adding Embedded Python Interpreter](http://joaoventura.net/blog/2016/embeddable-python-osx/)
+
+Once you are done with this guide, then you need to remove the `python3.8/lib/python3.8/site-packages` symlink and replace it with the `site-packages` that have been installed in your virtual environment as you were developing.
 
 ## References
 
