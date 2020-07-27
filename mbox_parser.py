@@ -77,7 +77,7 @@ if __name__ == '__main__':
         print('usage: mbox_parser.py [path_to_mbox]')
     else:
         mbox_file = argv[1]
-        file_name = ntpath.basename(mbox_file)
+        file_name = ntpath.basename(mbox_file).lower()
         export_file_name = mbox_file + ".csv"
         export_file = open(export_file_name, "wb")
 
