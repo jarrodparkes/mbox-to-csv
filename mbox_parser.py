@@ -81,18 +81,17 @@ if __name__ == '__main__':
         export_file_name = mbox_file + ".csv"
         export_file = open(export_file_name, "wb")
 
-        # get owner of the mbox
-        owner = ""
+        # get owner(s) of the mbox
         owners = []
         if path.exists(".owners"):
             with open('.owners', 'r') as ownerlist:
                 contents = ownerlist.read()
                 owner_dict = ast.literal_eval(contents)
-
-            for owner_key in owner_dict:
-                if owner_key in file_name:
-                    owner = owner_dict[owner_key]
-                    break
+            # find owners
+            for owners_array_key in owner_dict:
+                if owners_array_key in file_name:
+                    for owner_key in owner_dict[owners_array_key]:
+                        owners.append(owner_key)
 
         # get domain blacklist
         blacklist_domains = []
@@ -117,7 +116,7 @@ if __name__ == '__main__':
             contents = get_content(email)
 
             # apply rules to default content
-            row = rules.apply_rules(date, sent_from, sent_to, cc, subject, contents, owner, blacklist_domains)
+            row = rules.apply_rules(date, sent_from, sent_to, cc, subject, contents, owners, blacklist_domains)
 
             # write the row
             writer.writerow(row)
