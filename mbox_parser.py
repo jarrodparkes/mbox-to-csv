@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
         for email in mailbox.mbox(mbox_file):
             # capture default content
-            date = get_date(email["date"], "%m/%d/%Y")
+            date = get_date(email["date"], "%m/%d/%Y %H:%M:%S")
             sent_from = get_emails_clean(email["from"])
             sent_to = get_emails_clean(email["to"])
             cc = get_emails_clean(email["cc"])
