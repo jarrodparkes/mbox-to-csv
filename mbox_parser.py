@@ -18,6 +18,8 @@ from os import path
 
 # converts seconds since epoch to mm/dd/yyyy string
 def get_date(second_since_epoch, date_format):
+    if second_since_epoch is None:
+        return None
     time_tuple = parsedate_tz(email["date"])
     utc_seconds_since_epoch = mktime_tz(time_tuple)
     datetime_obj = datetime.datetime.fromtimestamp(utc_seconds_since_epoch)
@@ -112,7 +114,7 @@ if __name__ == '__main__':
             sent_from = get_emails_clean(email["from"])
             sent_to = get_emails_clean(email["to"])
             cc = get_emails_clean(email["cc"])
-            subject = re.sub('[\n\t\r]', ' -- ', email["subject"])
+            subject = re.sub('[\n\t\r]', ' -- ', str(email["subject"]))
             contents = get_content(email)
 
             # apply rules to default content
