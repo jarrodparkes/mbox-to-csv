@@ -7,8 +7,11 @@ Extract emails from an MBOX file into a CSV file.
 ## Example
 
 ```bash
-# rename rules.example.py to rules.py
-mv rules.examples.py rules.py
+# make a copy of rules.example.py named rules.py
+cp rules.examples.py rules.py
+
+# make a copy of .env.example named .env
+cp .env.example .env
 
 # launch virtual environment with included dependencies
 source env/bin/activate

@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from email_reply_parser import EmailReplyParser
 from email.utils import parsedate_tz, mktime_tz
 
@@ -6,6 +7,7 @@ import ast
 import datetime
 import mailbox
 import ntpath
+import os
 import quopri
 import re
 import rules
@@ -13,11 +15,10 @@ import sys
 import time
 import unicodecsv as csv
 
-import os.path
-from os import path
-
 # converts seconds since epoch to mm/dd/yyyy string
 def get_date(second_since_epoch, date_format):
+    if second_since_epoch is None:
+        return None
     time_tuple = parsedate_tz(email["date"])
     utc_seconds_since_epoch = mktime_tz(time_tuple)
     datetime_obj = datetime.datetime.fromtimestamp(utc_seconds_since_epoch)
@@ -76,6 +77,9 @@ if __name__ == '__main__':
     if len(argv) != 2:
         print('usage: mbox_parser.py [path_to_mbox]')
     else:
+        # load environment settings
+        load_dotenv(verbose=True)
+
         mbox_file = argv[1]
         file_name = ntpath.basename(mbox_file).lower()
         export_file_name = mbox_file + ".csv"
@@ -83,7 +87,7 @@ if __name__ == '__main__':
 
         # get owner(s) of the mbox
         owners = []
-        if path.exists(".owners"):
+        if os.path.exists(".owners"):
             with open('.owners', 'r') as ownerlist:
                 contents = ownerlist.read()
                 owner_dict = ast.literal_eval(contents)
@@ -95,7 +99,7 @@ if __name__ == '__main__':
 
         # get domain blacklist
         blacklist_domains = []
-        if path.exists(".blacklist"):
+        if os.path.exists(".blacklist"):
             with open('.blacklist', 'r') as blacklist:
                 blacklist_domains = [domain.rstrip() for domain in blacklist.readlines()]
 
@@ -108,11 +112,11 @@ if __name__ == '__main__':
 
         for email in mailbox.mbox(mbox_file):
             # capture default content
-            date = get_date(email["date"], "%m/%d/%Y")
+            date = get_date(email["date"], os.getenv("DATE_FORMAT"))
             sent_from = get_emails_clean(email["from"])
             sent_to = get_emails_clean(email["to"])
             cc = get_emails_clean(email["cc"])
-            subject = re.sub('[\n\t\r]', ' -- ', email["subject"])
+            subject = re.sub('[\n\t\r]', ' -- ', str(email["subject"]))
             contents = get_content(email)
 
             # apply rules to default content

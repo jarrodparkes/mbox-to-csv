@@ -6,3 +6,4 @@ example.mbox.csv
 *.icns
 rules.py
 python3.8
+.env
