@@ -118,7 +118,7 @@ if __name__ == '__main__':
             except:
                 date = None
             sent_from = get_emails_clean(email["from"])
-            sent_to = get_emails_clean(email["to"])
+            sent_to = get_emails_clean(email["to"]) or [ email.get("X-GM-THRID"), ]
             cc = get_emails_clean(email["cc"])
             subject = re.sub('[\n\t\r]', ' -- ', str(email["subject"]))
             contents = get_content(email)
