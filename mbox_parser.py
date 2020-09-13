@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from email_reply_parser import EmailReplyParser
@@ -16,10 +17,10 @@ import time
 import unicodecsv as csv
 
 # converts seconds since epoch to mm/dd/yyyy string
-def get_date(second_since_epoch, date_format):
-    if second_since_epoch is None:
+def get_date(rfc2822time, date_format):
+    if rfc2822time is None:
         return None
-    time_tuple = parsedate_tz(email["date"])
+    time_tuple = parsedate_tz(rfc2822time)
     utc_seconds_since_epoch = mktime_tz(time_tuple)
     datetime_obj = datetime.datetime.fromtimestamp(utc_seconds_since_epoch)
     return datetime_obj.strftime(date_format)
@@ -112,7 +113,10 @@ if __name__ == '__main__':
 
         for email in mailbox.mbox(mbox_file):
             # capture default content
-            date = get_date(email["date"], os.getenv("DATE_FORMAT"))
+            try:
+                date = get_date(email["date"] or " ".join(email._from.rstrip().split(" ")[-6:]), os.getenv("DATE_FORMAT"))
+            except:
+                date = None
             sent_from = get_emails_clean(email["from"])
             sent_to = get_emails_clean(email["to"])
             cc = get_emails_clean(email["cc"])
