@@ -1,75 +1,15 @@
 #!/usr/bin/env python3
-from bs4 import BeautifulSoup
+
 from dotenv import load_dotenv
-from email_reply_parser import EmailReplyParser
-from email.utils import parsedate_tz, mktime_tz
 
 import ast
-import datetime
+import capture
 import mailbox
 import ntpath
 import os
-import quopri
-import re
 import rules
 import sys
-import time
 import unicodecsv as csv
-
-# converts seconds since epoch to mm/dd/yyyy string
-def get_date(rfc2822time, date_format):
-    if rfc2822time is None:
-        return None
-    time_tuple = parsedate_tz(rfc2822time)
-    utc_seconds_since_epoch = mktime_tz(time_tuple)
-    datetime_obj = datetime.datetime.fromtimestamp(utc_seconds_since_epoch)
-    return datetime_obj.strftime(date_format)
-
-# clean content
-def clean_content(content):
-    # decode message from "quoted printable" format
-    content = quopri.decodestring(content)
-
-    # try to strip HTML tags
-    # if errors happen in BeautifulSoup (for unknown encodings), then bail
-    try:
-        soup = BeautifulSoup(content, "html.parser", from_encoding="iso-8859-1")
-    except Exception as e:
-        return ''
-    return ''.join(soup.findAll(text=True))
-
-# get contents of email
-def get_content(email):
-    parts = []
-
-    for part in email.walk():
-        if part.get_content_maintype() == 'multipart':
-            continue
-
-        content = part.get_payload(decode=True)
-
-        part_contents = ""
-        if content is None:
-            part_contents = ""
-        else:
-            part_contents = EmailReplyParser.parse_reply(clean_content(content))
-
-        parts.append(part_contents)
-
-    return parts[0]
-
-# get all emails in field
-def get_emails_clean(field):
-    # find all matches with format <user@example.com> or user@example.com
-    matches = re.findall(r'\<?([a-zA-Z0-9_\-\.]+@[a-zA-Z0-9_\-\.]+\.[a-zA-Z]{2,5})\>?', str(field))
-    if matches:
-        emails_cleaned = []
-        for match in matches:
-            emails_cleaned.append(match.lower())
-        unique_emails = list(set(emails_cleaned))
-        return sorted(unique_emails, key=str.lower)
-    else:
-        return []
 
 # entry point
 if __name__ == '__main__':
@@ -112,19 +52,18 @@ if __name__ == '__main__':
         row_written = 0
 
         for email in mailbox.mbox(mbox_file):
-            # capture default content
-            try:
-                date = get_date(email["date"] or " ".join(email._from.rstrip().split(" ")[-6:]), os.getenv("DATE_FORMAT"))
-            except:
-                date = None
-            sent_from = get_emails_clean(email["from"])
-            sent_to = get_emails_clean(email["to"]) or [ email.get("X-GM-THRID"), ]
-            cc = get_emails_clean(email["cc"])
-            subject = re.sub('[\n\t\r]', ' -- ', str(email["subject"]))
-            contents = get_content(email)
+            # capture email content
+            email_contents = capture.capture_contents(email, os.getenv("DATE_FORMAT"))
 
-            # apply rules to default content
-            row = rules.apply_rules(date, sent_from, sent_to, cc, subject, contents, owners, blacklist_domains)
+            # apply rules to the email content
+            row = rules.apply_rules(email_contents["date"],
+                                    email_contents["sent_from"],
+                                    email_contents["sent_to"],
+                                    email_contents["cc"],
+                                    email_contents["subject"],
+                                    email_contents["contents"],
+                                    owners,
+                                    blacklist_domains)
 
             # write the row
             writer.writerow(row)

@@ -7,6 +7,9 @@ Extract emails from an MBOX file into a CSV file.
 ## Example
 
 ```bash
+# make a copy of capture.example.py named capture.py
+cp capture.examples.py capture.py
+
 # make a copy of rules.example.py named rules.py
 cp rules.examples.py rules.py
 

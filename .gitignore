@@ -4,6 +4,7 @@ example.mbox.csv
 .blacklist
 .owners
 *.icns
+capture.py
 rules.py
 python3.8
 .env
