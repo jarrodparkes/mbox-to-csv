@@ -16,6 +16,9 @@ cp .env.example .env
 # launch virtual environment with included dependencies
 source env/bin/activate
 
+# install the required packages
+python3 -m pip install -r requirements.txt
+
 # run tool using example file
 python3 mbox_parser.py example.mbox
 
@@ -33,7 +36,9 @@ Once you are done with this guide, then you need to remove the `python3.8/lib/py
 
 ## References
 
-- [Python Virtual Environments](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
+- [Installing packages using pip and virtual environments](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
+- A tutorial on working with [Virtual Environments and Packages](https://docs.python.org/3/tutorial/venv.html)
+- [A Guide to Python’s Virtual Environments](https://towardsdatascience.com/virtual-environments-104c62d48c54)
 - [Email Address and MIME Parsing](https://github.com/mailgun/flanker)
 - [Signature Stripping Solution](https://github.com/mailgun/talon)
 - [MBOX Parsing Example: Mining the Social](https://www.oreilly.com/library/view/mining-the-social/9781449368180/ch06.html)
