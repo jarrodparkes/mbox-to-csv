@@ -1,6 +1,6 @@
 beautifulsoup4==4.9.1
 bs4==0.0.1
 email-reply-parser==0.5.9
-soupsieve==2.0.1
+soupsieve==2.8.4
 unicodecsv==0.14.1
 python-dotenv==0.14.0
